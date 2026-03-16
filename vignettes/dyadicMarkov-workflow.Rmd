@@ -1,0 +1,101 @@
+---
+title: "dyadicMarkov workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dyadicMarkov workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette illustrates a minimal workflow with `dyadicMarkov`. We compute empirical transition counts, estimate transition probabilities by maximum likelihood and classify univariate and bivariate dependence structures.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+### Create toy dyadic chains
+
+We begin with two deterministic toy state sequences for the two members of a dyad.
+
+```{r}
+chainFM <- c(
+  1L,2L,1L,2L,2L,1L,  1L,1L,2L,2L,1L,2L,
+  2L,1L,1L,2L,1L,2L,  1L,2L,2L,1L,2L,1L
+)
+chainSM <- c(
+  2L,1L,2L,1L,1L,2L,  2L,2L,1L,1L,2L,1L,
+  1L,2L,2L,1L,2L,1L,  2L,1L,1L,2L,1L,2L
+)
+
+length(chainFM)
+head(chainFM)
+length(chainSM)
+head(chainSM)
+```
+
+### Compute empirical transition counts
+
+We convert the observed dyadic sequences into empirical transition counts. These counts are the sufficient statistics used by the estimation procedure. For `states = 2`, the empirical count matrix has `states^2 = 4` rows, corresponding to the current dyadic states `(FM_t, SM_t)`, and `states = 2` columns, corresponding to the next state of the first member `FM_{t+1}`.
+
+```{r}
+states <- 2L
+emp <- dyadicMarkov::countEmp(chainFM = chainFM, chainSM = chainSM, states = states)
+emp
+```
+
+### Maximum likelihood estimation
+
+We estimate the transition probabilities by maximum likelihood. If a row has zero empirical counts, the function applies a uniform normalization so that the resulting row remains a valid probability vector.
+
+```{r}
+fit <- dyadicMarkov::mleEstimation(emp)
+fit
+rowSums(fit)
+```
+
+### Classify the univariate pattern
+
+Using the observed chains, we classify the univariate interaction pattern at a chosen significance level.
+
+```{r}
+pat <- dyadicMarkov::univariatePattern(
+  chainFM = chainFM,
+  chainSM = chainSM,
+  states  = 2L,
+  alpha   = 0.05
+)
+
+pat[["pattern"]]
+pat[["TEST.AM"]]
+pat[["TEST.PM"]]
+```
+
+### Classify the bivariate dependence case
+
+We now illustrate the first step of the bivariate workflow. Suppose that two categorical variables are observed repeatedly for both members of the dyad. We first compute the empirical bivariate transition counts and then test which dependence case is supported by the data.
+
+```{r}
+chainFM_V1 <- chainFM
+chainSM_V1 <- chainSM
+
+chainFM_V2 <- c(
+  1L,1L,2L,2L,1L,2L,  2L,1L,1L,2L,1L,2L,
+  1L,2L,1L,2L,2L,1L,  2L,2L,1L,1L,2L,1L
+)
+chainSM_V2 <- c(
+  2L,2L,1L,1L,2L,1L,  1L,2L,2L,1L,2L,1L,
+  2L,1L,2L,1L,1L,2L,  1L,1L,2L,2L,1L,2L
+)
+
+emp2 <- dyadicMarkov::countEmpBivariate(
+  chainFM_V1, chainSM_V1,
+  chainFM_V2, chainSM_V2,
+  states = 2L
+)
+
+emp2
+
+dyadicMarkov::bivariateCase(emp2, alpha = 0.05)
+```
+
+In this example, the bivariate procedure selects the trivial case, indicating that the observed dynamics can be represented by the simplest dependence structure considered by the method.
