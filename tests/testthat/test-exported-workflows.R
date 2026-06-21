@@ -6,8 +6,8 @@ test_that("countEmp returns expected shape and nonnegative counts", {
 
   expect_true(is.matrix(emp))
   expect_true(all(emp >= 0))
-  expect_equal(ncol(emp), 2L)
-  expect_equal(nrow(emp), 2L^2)
+  expect_identical(ncol(emp), 2L)
+  expect_identical(nrow(emp), 4L)
 })
 
 test_that("mleEstimation returns valid probabilities", {
@@ -39,20 +39,20 @@ test_that("univariatePattern runs", {
 
 test_that("bivariate pipeline runs for states=2 (exported API only)", {
   states <- 2L
-  T <- 200L
+  n_obs <- 200L
 
-  chainFM_V1 <- rep(c(1L,2L,1L,2L,2L), length.out = T)
-  chainSM_V1 <- rep(c(2L,1L,2L,1L,1L), length.out = T)
-  chainFM_V2 <- rep(c(1L,1L,2L,2L,1L), length.out = T)
-  chainSM_V2 <- rep(c(2L,2L,1L,1L,2L), length.out = T)
+  chainFM_V1 <- rep(c(1L,2L,1L,2L,2L), length.out = n_obs)
+  chainSM_V1 <- rep(c(2L,1L,2L,1L,1L), length.out = n_obs)
+  chainFM_V2 <- rep(c(1L,1L,2L,2L,1L), length.out = n_obs)
+  chainSM_V2 <- rep(c(2L,2L,1L,1L,2L), length.out = n_obs)
 
   emp <- dyadicMarkov::countEmpBivariate(
     chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2, states = states
   )
 
   expect_true(is.matrix(emp))
-  expect_equal(ncol(emp), states)
-  expect_equal(nrow(emp), states^4)
+  expect_identical(ncol(emp), states)
+  expect_identical(nrow(emp), as.integer(states^4))
 
   res_case <- dyadicMarkov::bivariateCase(empirical = emp, alpha = 0.05)
   expect_true(is.list(res_case))

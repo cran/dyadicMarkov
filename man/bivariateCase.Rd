@@ -2,28 +2,42 @@
 % Please edit documentation in R/apim-bivariate.R
 \name{bivariateCase}
 \alias{bivariateCase}
-\title{Classify the bivariate dependence case}
+\title{Bivariate case identification for dyadic Markov chains}
 \usage{
 bivariateCase(empirical, alpha = 0.05)
 }
 \arguments{
-\item{empirical}{An empirical bivariate count matrix (must be 16x2; states = 2).}
+\item{empirical}{An empirical bivariate count matrix with 16 rows and 2
+columns, as returned by \code{\link{countEmpBivariate}}.}
 
-\item{alpha}{A single number in (0, 1) giving the significance level.}
+\item{alpha}{A single number in (0, 1) giving the significance level.
+Default is 0.05.}
 }
 \value{
-A list with components \code{testUnivariate}, \code{testPartial}, and \code{case}.
+A list with class \code{c("dyadic_case", "list")} containing
+components \code{testUnivariate}, \code{testPartial}, \code{case}, and
+metadata fields \code{alpha} and \code{call}. It remains usable as an
+ordinary list.
 }
 \description{
-Classifies the bivariate case as \code{"trivial"}, \code{"univariate"},
-\code{"partial"}, or \code{"complete"} using two chi-squared tests against
-constrained models (states = 2 only).
+Identifies the bivariate case as \code{"trivial"}, \code{"univariate"},
+\code{"partial"}, or \code{"complete"} using two likelihood-ratio tests
+against constrained bivariate structures.
+}
+\details{
+The returned case corresponds to the global approach of the
+bivariate method. It determines whether the sequence analyzed is treated
+as trivial, univariate, partial bivariate, or complete bivariate before
+the local identification of the pattern of interaction.
 }
 \examples{
 chainFM_V1 <- c(1L, 2L, 1L, 2L, 2L, 1L)
 chainSM_V1 <- c(2L, 1L, 2L, 1L, 1L, 2L)
 chainFM_V2 <- c(1L, 1L, 2L, 2L, 1L, 2L)
 chainSM_V2 <- c(2L, 2L, 1L, 1L, 2L, 1L)
-emp <- countEmpBivariate(chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2, states = 2L)
+emp <- countEmpBivariate(
+  chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2,
+  states = 2L
+)
 bivariateCase(emp, alpha = 0.05)
 }

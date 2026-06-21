@@ -2,30 +2,36 @@
 % Please edit documentation in R/apim-bivariate.R
 \name{partialPattern}
 \alias{partialPattern}
-\title{Select the best partial bivariate pattern by AIC}
+\title{Partial bivariate pattern identification by AIC}
 \usage{
 partialPattern(empirical)
 }
 \arguments{
-\item{empirical}{An empirical bivariate count matrix (must be 16x2; states = 2).}
+\item{empirical}{An empirical bivariate count matrix with 16 rows and 2
+columns, as returned by \code{\link{countEmpBivariate}}.}
 }
 \value{
-A list with components \code{aic} (a data frame) and \code{pattern}
-(the selected pattern label).
+A list with class \code{c("dyadic_pattern", "list")} containing
+components \code{aic} (a data frame with candidate patterns and AIC
+values), \code{pattern} (the selected pattern label), and \code{call}. It
+remains usable as an ordinary list.
 }
 \description{
-Compares the partial bivariate patterns B1/B2/B3 using AIC and returns the
-selected pattern.
+Compares the partial bivariate patterns B1, B2, and B3 using AIC and returns
+the selected pattern.
 }
 \details{
-Requires a bivariate empirical count matrix for \code{states = 2}
-(output of \code{\link{countEmpBivariate}}).
+Conditional on the partial bivariate case, AIC is used to select
+among the B1, B2, and B3 structures.
 }
 \examples{
 chainFM_V1 <- c(1L, 2L, 1L, 2L, 2L, 1L)
 chainSM_V1 <- c(2L, 1L, 2L, 1L, 1L, 2L)
 chainFM_V2 <- c(1L, 1L, 2L, 2L, 1L, 2L)
 chainSM_V2 <- c(2L, 2L, 1L, 1L, 2L, 1L)
-emp <- countEmpBivariate(chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2, states = 2L)
+emp <- countEmpBivariate(
+  chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2,
+  states = 2L
+)
 partialPattern(emp)
 }

@@ -2,19 +2,28 @@
 % Please edit documentation in R/helpers-core.R
 \name{mleEstimation}
 \alias{mleEstimation}
-\title{Maximum likelihood estimation from empirical counts}
+\title{Maximum likelihood estimation of transition probabilities}
 \usage{
 mleEstimation(empirical)
 }
 \arguments{
-\item{empirical}{An empirical transition count matrix (typically from \code{\link{countEmp}}).}
+\item{empirical}{An empirical count matrix.}
 }
 \value{
-A numeric matrix of MLE transition probabilities with the same dimensions as \code{empirical}.
+A numeric matrix with class
+\code{c("dyadic_mle", "matrix", "array")}
+containing estimated transition probabilities with the same dimensions as
+\code{empirical}. It remains usable as an ordinary matrix.
 }
 \description{
 Estimates transition probabilities by maximum likelihood from an empirical
-count matrix returned by \code{\link{countEmp}} (or related counters).
+count matrix returned by \code{\link{countEmp}} or
+\code{\link{countEmpBivariate}}.
+}
+\details{
+Each row of \code{empirical} is normalized independently. Rows with
+zero total count are assigned a uniform probability vector, so each row of
+the returned matrix sums to one.
 }
 \examples{
 chainFM <- c(1L, 2L, 1L, 2L, 2L, 1L)

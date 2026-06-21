@@ -2,29 +2,47 @@
 % Please edit documentation in R/apim-bivariate.R
 \name{countEmpBivariate}
 \alias{countEmpBivariate}
-\title{Empirical transition counts for the bivariate dyadic model}
+\title{Empirical transition counts for bivariate dyadic sequences}
 \usage{
 countEmpBivariate(chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2, states = 2L)
 }
 \arguments{
-\item{chainFM_V1, chainSM_V1}{Vectors of observed states for variable 1 (FM and SM).}
+\item{chainFM_V1, chainSM_V1}{Vectors of observed states for variable 1
+for the first and second member.}
 
-\item{chainFM_V2, chainSM_V2}{Vectors of observed states for variable 2 (FM and SM).}
+\item{chainFM_V2, chainSM_V2}{Vectors of observed states for variable 2
+for the first and second member.}
 
-\item{states}{A single integer. Currently only \code{2} is supported.}
+\item{states}{A single integer. Currently only \code{2} is supported.
+Default is 2.}
 }
 \value{
-An integer matrix of counts with 16 rows and 2 columns (when \code{states = 2}).
+An integer matrix with class
+\code{c("dyadic_counts", "matrix", "array")} with 16 rows and 2 columns
+when \code{states = 2}. It remains usable as an ordinary matrix.
 }
 \description{
-Computes empirical transition counts for the bivariate dyadic model (two variables).
-The current implementation supports \code{states = 2} only.
+Computes empirical transition counts for bivariate categorical dyadic
+sequences with two variables. This function currently supports
+\code{states = 2} only.
+}
+\details{
+The bivariate counter currently supports \code{states = 2} only.
+Rows represent the previous dyadic states of variable 1 and variable 2.
+The implementation uses the row mapping
+\code{states^2 * (states * (FM_V1,t - 1) + (SM_V1,t - 1)) +}
+\code{states * (FM_V2,t - 1) + (SM_V2,t - 1) + 1}. Columns correspond to
+the state of the first member on variable 1 at the next time point,
+\eqn{FM_{V1,t+1}}.
 }
 \examples{
 chainFM_V1 <- c(1L, 2L, 1L, 2L, 2L, 1L)
 chainSM_V1 <- c(2L, 1L, 2L, 1L, 1L, 2L)
 chainFM_V2 <- c(1L, 1L, 2L, 2L, 1L, 2L)
 chainSM_V2 <- c(2L, 2L, 1L, 1L, 2L, 1L)
-emp <- countEmpBivariate(chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2, states = 2L)
+emp <- countEmpBivariate(
+  chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2,
+  states = 2L
+)
 dim(emp)
 }

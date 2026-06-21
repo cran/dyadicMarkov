@@ -2,7 +2,7 @@
 % Please edit documentation in R/apim-univariate.R
 \name{univariatePattern}
 \alias{univariatePattern}
-\title{Univariate pattern classification for dyadic Markov chains}
+\title{Univariate pattern identification for dyadic Markov chains}
 \usage{
 univariatePattern(chainFM, chainSM, states, alpha = 0.05)
 }
@@ -13,17 +13,27 @@ univariatePattern(chainFM, chainSM, states, alpha = 0.05)
 
 \item{states}{A single integer >= 2 giving the number of states.}
 
-\item{alpha}{A single number in (0, 1) giving the significance level.}
+\item{alpha}{A single number in (0, 1) giving the significance level.
+Default is 0.05.}
 }
 \value{
-A list with two \code{htest} objects (\code{TEST.AM}, \code{TEST.PM})
-and a string \code{pattern}.
+A list with class \code{c("dyadic_pattern", "list")} containing two
+\code{htest} objects (\code{TEST.AM}, \code{TEST.PM}), a string
+\code{pattern}, and metadata fields \code{alpha}, \code{states}, and
+\code{call}. It remains usable as an ordinary list.
 }
 \description{
-Computes empirical transition counts, fits the unrestricted model by maximum
-likelihood, and performs chi-squared goodness-of-fit tests against Actor-only
-(AM) and Partner-only (PM) constrained models to classify the univariate dyadic
-pattern.
+Computes empirical transition counts, estimates transition probabilities by
+maximum likelihood, and performs likelihood-ratio tests against the
+actor-only
+and partner-only constrained models to identify the univariate pattern of
+interaction.
+}
+\details{
+Pattern labels summarize which structure is retained by the tests:
+\code{IM (A0)} denotes an independence pattern, \code{APM (A1)} an
+actor-partner pattern, \code{AM (A2)} an actor-only pattern, and
+\code{PM (A3)} a partner-only pattern.
 }
 \examples{
 chainFM <- c(1L, 2L, 1L, 2L, 2L, 1L)

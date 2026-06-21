@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers-core.R
 \name{countEmp}
 \alias{countEmp}
-\title{Empirical transition counts for dyadic Markov chains}
+\title{Empirical transition counts for univariate dyadic sequences}
 \usage{
 countEmp(chainFM, chainSM, states)
 }
@@ -14,12 +14,21 @@ countEmp(chainFM, chainSM, states)
 \item{states}{A single integer >= 2 giving the number of states.}
 }
 \value{
-An integer matrix with \eqn{states^2} rows and \code{states} columns.
+An integer matrix with class
+\code{c("dyadic_counts", "matrix", "array")},
+with \eqn{states^2} rows and \code{states} columns. It remains usable as an
+ordinary matrix.
 }
 \description{
-Computes empirical transition counts for a dyadic Markov process from two observed
-state sequences (FM and SM). Rows correspond to dyad states (FM, SM) and columns
-to the next FM state.
+Computes empirical transition counts for the sequences of the first and
+second member. Rows correspond to dyadic states of the two members, and
+columns correspond to the state of the first member at the next time point.
+}
+\details{
+Rows correspond to current dyadic states \eqn{(FM_t, SM_t)}.
+For general \code{states}, the row index is computed as
+\code{1 + states * (FM_t - 1) + (SM_t - 1)}. Columns correspond to the
+state of the first member at the next time point, \eqn{FM_{t+1}}.
 }
 \examples{
 chainFM <- c(1L, 2L, 1L, 2L, 2L, 1L)

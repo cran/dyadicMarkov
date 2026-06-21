@@ -15,5 +15,10 @@ test_that("countEmp returns exact counts on a tiny hand-constructed chain", {
     nrow = 4L, ncol = 2L, byrow = TRUE
   )
 
-  expect_identical(got, exp)
+  expect_identical(unname(unclass(got)), exp)
+  expect_identical(rownames(got), c(
+    "FM1_SM1", "FM1_SM2",
+    "FM2_SM1", "FM2_SM2"
+  ))
+  expect_identical(colnames(got), c("next_1", "next_2"))
 })

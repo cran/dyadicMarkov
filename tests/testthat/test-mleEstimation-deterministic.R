@@ -21,5 +21,9 @@ test_that("mleEstimation normalizes rows and uses uniform for zero rows", {
     nrow = 4L, ncol = 2L, byrow = TRUE
   )
 
-  expect_identical(got, exp)
+  expect_identical(unname(unclass(got)), exp)
+  expect_identical(rownames(got), c(
+    "previous_1", "previous_2", "previous_3", "previous_4"
+  ))
+  expect_identical(colnames(got), c("next_1", "next_2"))
 })

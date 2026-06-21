@@ -1,0 +1,118 @@
+---
+title: "Univariate dyadic workflow"
+bibliography: references.bib
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Univariate dyadic workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Overview
+
+This vignette shows the univariate workflow implemented in `dyadicMarkov`. In the univariate setting, one categorical variable is observed repeatedly for the two members of a dyad. The workflow follows the single-case method described in @bollen2023: empirical transition counts are computed from the dyadic sequence, transition probabilities are estimated by maximum likelihood, and restricted actor/partner structures are compared to identify the pattern of interaction.
+
+The example uses the data set `dyadic_univariate_example` included in the package. The data are synthetic and are used only to illustrate the required input structure and the package workflow.
+
+## Data
+
+The univariate example contains one categorical variable for the first member (`FM`) and the second member (`SM`) of a dyad. Each row corresponds to one measurement occasion. In the first analysis, `FM` is the first member sequence analyzed and `SM` is the second member sequence.
+
+```{r univariate-data}
+utils::data("dyadic_univariate_example", package = "dyadicMarkov")
+
+head(dyadic_univariate_example)
+dim(dyadic_univariate_example)
+```
+
+The states are integer-coded. In this example, both members can take the values 1 or 2.
+
+```{r univariate-states}
+table(dyadic_univariate_example$FM)
+table(dyadic_univariate_example$SM)
+```
+
+## Empirical transition counts
+
+The first step is to compute empirical transition counts with `countEmp()`. For `states = 2`, the rows represent the four possible previous dyadic states `(FM_t, SM_t)`, and the columns represent the state of the first member at the next time point, `FM_{t+1}`.
+
+```{r univariate-counts}
+emp_uni <- dyadicMarkov::countEmp(
+  chainFM = dyadic_univariate_example$FM,
+  chainSM = dyadic_univariate_example$SM,
+  states = 2L
+)
+
+emp_uni
+class(emp_uni)
+```
+
+The resulting object keeps ordinary matrix behavior.
+
+```{r univariate-counts-matrix}
+dim(emp_uni)
+rowSums(emp_uni)
+```
+
+## Maximum-likelihood transition probabilities
+
+The empirical counts can be converted into transition probabilities using `mleEstimation()`. Rows with positive totals are normalized independently. For an unobserved previous-state combination, the transition probabilities are unidentified; the package returns a uniform row as an implementation convention.
+
+```{r univariate-mle}
+fit_uni <- dyadicMarkov::mleEstimation(emp_uni)
+
+round(fit_uni, 3)
+rowSums(fit_uni)
+class(fit_uni)
+```
+
+The estimated transition matrix summarizes the empirical transition structure of the observed dyadic sequence.
+
+## Univariate pattern identification
+
+The function `univariatePattern()` performs the univariate identification step. It compares the unrestricted actor-partner structure with actor-only and partner-only restricted structures through likelihood-ratio tests. The two test outcomes are then combined to classify the sequence as Actor-Partner, Actor-only, Partner-only or Independence.
+
+```{r univariate-pattern}
+pat_uni <- dyadicMarkov::univariatePattern(
+  chainFM = dyadic_univariate_example$FM,
+  chainSM = dyadic_univariate_example$SM,
+  states = 2L,
+  alpha = 0.05
+)
+
+pat_uni
+```
+
+For this example, the selected pattern is stored in the `pattern` component.
+
+```{r univariate-pattern-details}
+pat_uni$pattern
+pat_uni$TEST.AM
+pat_uni$TEST.PM
+summary(pat_uni)
+```
+
+The returned object is a list with an additional S3 class. It can therefore be printed and summarized, while still allowing direct access to its components.
+
+## Interpretation
+
+In this example, the selected pattern is `PM (A3)`. This indicates that the previous state of the second member is retained in the restricted structure, whereas the previous state of the first member is not retained. In the terminology of the univariate method, this corresponds to a partner-only pattern.
+
+The result should be interpreted as a pattern description for the member sequence analyzed by the function. The function call above analyzes `FM` as the first member sequence and `SM` as the second member sequence. Reversing the two arguments analyzes the sequence from the perspective of the second member. Thus, describing both members of a dyad requires two calls, and each returned pattern is specific to the member sequence analyzed.
+
+```{r reverse-perspective}
+pat_uni_reverse <- dyadicMarkov::univariatePattern(
+  chainFM = dyadic_univariate_example$SM,
+  chainSM = dyadic_univariate_example$FM,
+  states = 2L,
+  alpha = 0.05
+)
+
+pat_uni_reverse
+```
+
+## References

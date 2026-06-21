@@ -8,5 +8,5 @@ test_that("countEmpBivariate returns integer matrix with correct dimensions", {
 
   expect_true(is.matrix(emp))
   expect_type(emp, "integer")
-  expect_equal(dim(emp), c(16L, 2L))
+  expect_identical(dim(emp), c(16L, 2L))
 })

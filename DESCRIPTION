@@ -1,28 +1,37 @@
 Package: dyadicMarkov
 Type: Package
-Title: Pattern Identification for Dyadic Sequences Using Transition
-        Matrices
-Version: 0.1.0
+Title: Pattern Estimation and Identification for Dyadic Sequences Using
+        Transition Matrices in R
+Version: 0.1.1
 Authors@R: c(
-  person("Mattia", "Böllenrücher", email = "mattia.boellenruecher@student.unisg.ch", role = c("aut", "cre", "cph")),
-  person("Mégane", "Bollenrucher", role = "aut"),
-  person("Jean-Philippe", "Antonietti", role = "aut"))
-Description: Provides methods for analyzing dyadic interaction sequences using transition matrices within the Actor-Partner Interdependence Model. The package supports the computation of empirical transition counts, maximum likelihood estimation of transition probabilities and identification of interaction patterns in univariate and bivariate dyadic interaction sequences.
+  person("Mattia", "Böllenrücher", email = "mattia.boellenruecher@student.unisg.ch", role = c("aut", "cre", "cph"),
+         comment = c(ORCID = "0009-0004-4149-4745")),
+  person("Mégane", "Bollenrücher", role = "aut",
+         comment = c(ORCID = "0000-0002-9035-8799")),
+  person("Jean-Philippe", "Antonietti", role = "aut",
+         comment = c(ORCID = "0000-0003-0117-4769")))
+Description: Provides methods for analyzing categorical dyadic sequences using transition matrices within the Longitudinal Actor-Partner Interdependence Model and Markov-chain framework. The package supports empirical transition counts, maximum likelihood estimation of transition probabilities, and identification of univariate and bivariate patterns of interaction in dyadic sequences.
 License: MIT + file LICENSE
-URL: https://github.com/BoellenruecherM/dyadicMarkov-public
+URL: https://github.com/BoellenruecherM/dyadicMarkov-public,
+        https://boellenruecherm.github.io/dyadicMarkov-public/
 BugReports: https://github.com/BoellenruecherM/dyadicMarkov-public/issues
 Encoding: UTF-8
 Language: en-US
 Depends: R (>= 4.1.0)
+Imports: stats
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
 Config/testthat/edition: 3
+LazyData: true
 NeedsCompilation: no
-Packaged: 2026-03-11 16:44:22 UTC; bolle
-Author: Mattia Böllenrücher [aut, cre, cph],
-  Mégane Bollenrucher [aut],
-  Jean-Philippe Antonietti [aut]
+Packaged: 2026-06-21 11:45:05 UTC; bolle
+Author: Mattia Böllenrücher [aut, cre, cph] (ORCID:
+    <https://orcid.org/0009-0004-4149-4745>),
+  Mégane Bollenrücher [aut] (ORCID:
+    <https://orcid.org/0000-0002-9035-8799>),
+  Jean-Philippe Antonietti [aut] (ORCID:
+    <https://orcid.org/0000-0003-0117-4769>)
 Maintainer: Mattia Böllenrücher <mattia.boellenruecher@student.unisg.ch>
 Repository: CRAN
-Date/Publication: 2026-03-16 19:50:08 UTC
+Date/Publication: 2026-06-21 13:40:02 UTC

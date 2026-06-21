@@ -1,0 +1,148 @@
+---
+title: "Bivariate dyadic workflow"
+bibliography: references.bib
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bivariate dyadic workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Overview
+
+This vignette shows the bivariate workflow implemented in `dyadicMarkov`. In the bivariate setting, two categorical variables are observed repeatedly for the two members of a dyad. The bivariate method follows the global-and-local procedure described in @bollen2026.
+
+The current bivariate functions support `states = 2`. With two binary variables observed for two members, the previous state is described by four binary components. The empirical bivariate count matrix therefore has 16 rows and 2 columns.
+
+## Data
+
+The example data set `dyadic_bivariate_example` contains two categorical variables for the first member and the second member of a dyad. Each row corresponds to one measurement occasion.
+
+```{r bivariate-data}
+utils::data("dyadic_bivariate_example", package = "dyadicMarkov")
+
+head(dyadic_bivariate_example)
+dim(dyadic_bivariate_example)
+```
+
+The four chains are first-member and second-member sequences for the main variable (`V1`) and the second variable (`V2`).
+
+```{r bivariate-states}
+table(dyadic_bivariate_example$FM_V1)
+table(dyadic_bivariate_example$SM_V1)
+```
+
+## Empirical bivariate transition counts
+
+The first step is to construct the empirical bivariate transition count matrix with `countEmpBivariate()`. Rows represent the 16 possible previous-state combinations of the two dyadic variables. Columns represent the next state of the first member on the main variable.
+
+```{r bivariate-counts}
+emp_bi <- dyadicMarkov::countEmpBivariate(
+  chainFM_V1 = dyadic_bivariate_example$FM_V1,
+  chainSM_V1 = dyadic_bivariate_example$SM_V1,
+  chainFM_V2 = dyadic_bivariate_example$FM_V2,
+  chainSM_V2 = dyadic_bivariate_example$SM_V2,
+  states = 2L
+)
+
+emp_bi
+class(emp_bi)
+dim(emp_bi)
+```
+
+## Global bivariate case
+
+The function `bivariateCase()` performs the global step of the bivariate method. It applies the package chi-squared comparisons to classify the dependence structure of the member sequence analyzed as a trivial, univariate, partial bivariate or complete bivariate case.
+
+```{r bivariate-case}
+case_bi <- dyadicMarkov::bivariateCase(emp_bi, alpha = 0.05)
+
+case_bi
+case_bi$case
+summary(case_bi)
+```
+
+This example is identified as a complete bivariate case. The appropriate local step is therefore to compare complete bivariate candidate patterns.
+
+## Local pattern identification for a complete case
+
+For a complete bivariate case, `completePattern()` compares the complete bivariate candidate structures by AIC and returns the selected pattern.
+
+```{r complete-pattern}
+complete_bi <- dyadicMarkov::completePattern(emp_bi)
+
+complete_bi
+complete_bi$pattern
+complete_bi$aic
+```
+
+In this example, the selected complete bivariate pattern is `D2`, labelled by the package as complete actor on the main, actor-partner on the second.
+
+## Reassigning member and main-variable roles
+
+The previous analysis used `FM_V1` as the member-variable sequence analyzed, `V1` as the main variable and `V2` as the second variable. In the bivariate method, these are analysis roles rather than fixed identities. To describe the dyad more completely, the roles can be reassigned so that each member-variable sequence is analyzed in turn.
+
+The same data set gives different branches of the global-and-local procedure depending on the member-variable sequence analyzed and the main variable.
+
+```{r bivariate-role-rotation}
+analyze_bivariate <- function(label, fm_v1, sm_v1, fm_v2, sm_v2) {
+  emp <- dyadicMarkov::countEmpBivariate(
+    chainFM_V1 = fm_v1,
+    chainSM_V1 = sm_v1,
+    chainFM_V2 = fm_v2,
+    chainSM_V2 = sm_v2,
+    states = 2L
+  )
+
+  case <- dyadicMarkov::bivariateCase(emp, alpha = 0.05)
+
+  cat("\n", label, "\n", sep = "")
+  print(case)
+
+  if (identical(case$case, "complete")) {
+    print(dyadicMarkov::completePattern(emp))
+  }
+
+  if (identical(case$case, "partial")) {
+    print(dyadicMarkov::partialPattern(emp))
+  }
+
+  if (identical(case$case, "univariate")) {
+    print(dyadicMarkov::univariatePattern(fm_v1, sm_v1, states = 2L, alpha = 0.05))
+  }
+}
+
+d <- dyadic_bivariate_example
+
+analyze_bivariate(
+  "FM_V1 as analyzed sequence, V1 as main variable",
+  d$FM_V1, d$SM_V1, d$FM_V2, d$SM_V2
+)
+
+analyze_bivariate(
+  "SM_V1 as analyzed sequence, V1 as main variable",
+  d$SM_V1, d$FM_V1, d$SM_V2, d$FM_V2
+)
+
+analyze_bivariate(
+  "FM_V2 as analyzed sequence, V2 as main variable",
+  d$FM_V2, d$SM_V2, d$FM_V1, d$SM_V1
+)
+
+analyze_bivariate(
+  "SM_V2 as analyzed sequence, V2 as main variable",
+  d$SM_V2, d$FM_V2, d$SM_V1, d$FM_V1
+)
+```
+
+For this example, the four role assignments illustrate three branches of the procedure: complete bivariate cases for the two `V1` member-variable sequences, a partial bivariate case for `FM_V2`, and a univariate case for `SM_V2`. The partial branch is therefore demonstrated with the same bivariate example data rather than with an artificial seeded example.
+
+## Reading the global and local steps together
+
+The global and local steps should be read together. If `bivariateCase()` returns `trivial`, no subsequent local pattern is selected. If it returns `univariate`, the bivariate workflow returns to `univariatePattern()` using the first- and second-member sequences of the current main variable. If it returns `partial`, the local step is `partialPattern()`. If it returns `complete`, the local step is `completePattern()`.
+
+## References

@@ -1,16 +1,24 @@
-#' Univariate pattern classification for dyadic Markov chains
+#' Univariate pattern identification for dyadic Markov chains
 #'
-#' Computes empirical transition counts, fits the unrestricted model by maximum
-#' likelihood, and performs chi-squared goodness-of-fit tests against Actor-only
-#' (AM) and Partner-only (PM) constrained models to classify the univariate dyadic
-#' pattern.
+#' Computes empirical transition counts, estimates transition probabilities by
+#' maximum likelihood, and performs likelihood-ratio tests against the
+#' actor-only
+#' and partner-only constrained models to identify the univariate pattern of
+#' interaction.
 #'
 #' @param chainFM Vector of observed states for the first member (FM).
 #' @param chainSM Vector of observed states for the second member (SM).
 #' @param states A single integer >= 2 giving the number of states.
 #' @param alpha A single number in (0, 1) giving the significance level.
-#' @returns A list with two \code{htest} objects (\code{TEST.AM}, \code{TEST.PM})
-#'   and a string \code{pattern}.
+#'   Default is 0.05.
+#' @details Pattern labels summarize which structure is retained by the tests:
+#'   \code{IM (A0)} denotes an independence pattern, \code{APM (A1)} an
+#'   actor-partner pattern, \code{AM (A2)} an actor-only pattern, and
+#'   \code{PM (A3)} a partner-only pattern.
+#' @returns A list with class \code{c("dyadic_pattern", "list")} containing two
+#'   \code{htest} objects (\code{TEST.AM}, \code{TEST.PM}), a string
+#'   \code{pattern}, and metadata fields \code{alpha}, \code{states}, and
+#'   \code{call}. It remains usable as an ordinary list.
 #' @examples
 #' chainFM <- c(1L, 2L, 1L, 2L, 2L, 1L)
 #' chainSM <- c(2L, 1L, 2L, 1L, 1L, 2L)
@@ -18,23 +26,11 @@
 #' @export
 univariatePattern <- function(chainFM, chainSM, states, alpha = 0.05) {
 
-  # Significance level
-  if (!(length(alpha) == 1L && is.finite(alpha) && alpha > 0 && alpha < 1)) {
-    stop("alpha must be a single number in (0, 1).")
-  }
+  .validate_alpha(alpha)
 
-  # States must be provided explicitly
-  if (missing(states) ||
-      !(length(states) == 1L && is.finite(states) &&
-        states == as.integer(states) && states >= 2L)) {
-    stop("states must be provided as a single integer >= 2.")
-  }
-  states <- as.integer(states)
+  states <- .validate_states(states)
 
-  # No missing values in the observed sequences
-  if (anyNA(chainFM) || anyNA(chainSM)) {
-    stop("chains must not contain NA.")
-  }
+  .validate_univariate_chains(chainFM, chainSM, states)
 
   # Empirical counts under the unrestricted model
   emp <- countEmp(chainFM = chainFM, chainSM = chainSM, states = states)
@@ -43,14 +39,14 @@ univariatePattern <- function(chainFM, chainSM, states, alpha = 0.05) {
   theoAM <- countTheo(empirical = emp, pattern = "AM")
   theoPM <- countTheo(empirical = emp, pattern = "PM")
 
-  # Local chi-square tests against each constrained model
+  # Local likelihood-ratio tests against each constrained model
   lrtAM <- lrtLocal(population = theoAM, empirical = emp)
   lrtPM <- lrtLocal(population = theoPM, empirical = emp)
 
   pvalueAM <- lrtAM[["p.value"]]
   pvaluePM <- lrtPM[["p.value"]]
 
-  # Pattern classification based on which constraints are rejected
+  # Pattern identification based on which constraints are rejected
   if (is.na(pvalueAM) || is.na(pvaluePM)) {
     type <- NA_character_
   } else if (pvalueAM > alpha && pvaluePM > alpha) {
@@ -65,7 +61,7 @@ univariatePattern <- function(chainFM, chainSM, states, alpha = 0.05) {
 
   # Wrap results as htest objects with clear method labels
   TEST1 <- .make_htest(
-    method = "Chi-squared test, Actor-only model",
+    method = "Likelihood-ratio test, Actor-only model",
     dataName = "Observed vs Estimated",
     alternative = "The unrestricted model fits the data better",
     statistic = lrtAM[["statistic"]],
@@ -74,7 +70,7 @@ univariatePattern <- function(chainFM, chainSM, states, alpha = 0.05) {
   )
 
   TEST2 <- .make_htest(
-    method = "Chi-squared test, Partner-only model",
+    method = "Likelihood-ratio test, Partner-only model",
     dataName = "Observed vs Estimated",
     alternative = "The unrestricted model fits the data better",
     statistic = lrtPM[["statistic"]],
@@ -82,5 +78,14 @@ univariatePattern <- function(chainFM, chainSM, states, alpha = 0.05) {
     pValue = lrtPM[["p.value"]]
   )
 
-  list(TEST.AM = TEST1, TEST.PM = TEST2, pattern = type)
+  out <- list(
+    TEST.AM = TEST1,
+    TEST.PM = TEST2,
+    pattern = type,
+    alpha = alpha,
+    states = states,
+    call = match.call()
+  )
+  class(out) <- c("dyadic_pattern", "list")
+  out
 }

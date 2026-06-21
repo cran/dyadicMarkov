@@ -2,31 +2,36 @@
 % Please edit documentation in R/apim-bivariate.R
 \name{completePattern}
 \alias{completePattern}
-\title{Select the best complete bivariate pattern by AIC}
+\title{Complete bivariate pattern identification by AIC}
 \usage{
 completePattern(empirical)
 }
 \arguments{
-\item{empirical}{An empirical bivariate count matrix (must be 16x2; states = 2).}
+\item{empirical}{An empirical bivariate count matrix with 16 rows and 2
+columns, as returned by \code{\link{countEmpBivariate}}.}
 }
 \value{
-A list with components \code{aic} (a data frame with columns
-\code{pattern}, \code{matrix}, \code{aic}) and \code{pattern} (the selected
-pattern label).
+A list with class \code{c("dyadic_pattern", "list")} containing
+components \code{aic} (a data frame with columns \code{pattern},
+\code{matrix}, and \code{aic}), \code{pattern} (the selected pattern
+label), and \code{call}. It remains usable as an ordinary list.
 }
 \description{
-Compares complete bivariate patterns (C, D1–D4, E1–E4) using AIC and returns
-the selected pattern.
+Compares the complete bivariate patterns C, D1--D4, and E1--E4 using AIC and
+returns the selected pattern.
 }
 \details{
-Requires a bivariate empirical count matrix for \code{states = 2}
-(output of \code{\link{countEmpBivariate}}).
+Conditional on the complete bivariate case, AIC is used to select
+among the C, D1--D4, and E1--E4 structures.
 }
 \examples{
 chainFM_V1 <- c(1L, 2L, 1L, 2L, 2L, 1L)
 chainSM_V1 <- c(2L, 1L, 2L, 1L, 1L, 2L)
 chainFM_V2 <- c(1L, 1L, 2L, 2L, 1L, 2L)
 chainSM_V2 <- c(2L, 2L, 1L, 1L, 2L, 1L)
-emp <- countEmpBivariate(chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2, states = 2L)
+emp <- countEmpBivariate(
+  chainFM_V1, chainSM_V1, chainFM_V2, chainSM_V2,
+  states = 2L
+)
 completePattern(emp)
 }

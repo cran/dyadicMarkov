@@ -6,5 +6,5 @@ test_that("countEmp returns integer matrix with correct dimensions", {
 
   expect_true(is.matrix(out))
   expect_type(out, "integer")
-  expect_equal(dim(out), c(4L, 2L))
+  expect_identical(dim(out), c(4L, 2L))
 })

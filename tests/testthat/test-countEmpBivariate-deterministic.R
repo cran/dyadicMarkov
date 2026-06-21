@@ -13,5 +13,9 @@ test_that("countEmpBivariate returns exact counts on a tiny hand-constructed cas
   # Transition 2: row=10, col=1 gets +1
   exp[10L, 1L] <- 1L
 
-  expect_identical(got, exp)
+  expect_identical(unname(unclass(got)), exp)
+  expect_identical(length(rownames(got)), 16L)
+  expect_identical(rownames(got)[1L], "mainFM1_mainSM1_secondFM1_secondSM1")
+  expect_identical(rownames(got)[10L], "mainFM2_mainSM1_secondFM1_secondSM2")
+  expect_identical(colnames(got), c("next_1", "next_2"))
 })
